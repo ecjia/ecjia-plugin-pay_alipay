@@ -4,7 +4,6 @@
  * 功能：支付宝各接口请求提交类
  * 详细：构造支付宝各接口表单HTML文本，获取远程HTTP数据
  */
-RC_Loader::load_plugin_class('alipay_core', 'pay_alipay', false);
 abstract class alipay_request {
     var $alipay_config;
     /**
@@ -18,8 +17,8 @@ abstract class alipay_request {
     public function __construct($alipay_config){
         $this->alipay_config = $alipay_config;
         
-        $this->sign_md5 = RC_Loader::load_plugin_class('alipay_sign_md5', 'pay_alipay');
-        $this->sign_rsa = RC_Loader::load_plugin_class('alipay_sign_rsa', 'pay_alipay');
+        $this->sign_md5 = new alipay_sign_md5();
+        $this->sign_rsa = new alipay_sign_rsa();
     }
     
     /**
@@ -137,7 +136,8 @@ abstract class alipay_request {
         
         //待请求参数数组字符串
         $request_data = $this->build_request_param($param_temp);
-
+//		TODO:获取不到，暂给空值
+        $this->alipay_config['cacert'] = '';
         //远程获取数据
         $sResult = alipay_core::getHttpResponsePOST($this->alipay_gateway_new, $this->alipay_config['cacert'], $request_data);
     

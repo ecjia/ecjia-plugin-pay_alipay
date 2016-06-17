@@ -2,7 +2,6 @@
 /**
  * MD5加密
  */
-RC_Loader::load_plugin_class('alipay_sign_interface', 'pay_alipay', false);
 class alipay_sign_md5 implements alipay_sign_interface {
     
     public function sign($prestr, $key) {

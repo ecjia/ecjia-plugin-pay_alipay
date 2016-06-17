@@ -37,5 +37,16 @@ class plugin_pay_alipay {
 RC_Plugin::register_activation_hook(__FILE__, array('plugin_pay_alipay', 'install'));
 RC_Plugin::register_deactivation_hook(__FILE__, array('plugin_pay_alipay', 'uninstall'));
 RC_Hook::add_filter('payment_factory_adapter_instance', array( 'plugin_pay_alipay', 'adapter_instance' ), 10, 2);
+RC_Hook::add_action('class_alipay_core', function () {RC_Loader::load_plugin_class('alipay_core', 'pay_alipay', false);});
+RC_Hook::add_action('class_alipay_notify', function () {RC_Loader::load_plugin_class('alipay_notify', 'pay_alipay', false);});
+RC_Hook::add_action('class_alipay_notify_web', function () {RC_Loader::load_plugin_class('alipay_notify_web', 'pay_alipay', false);});
+RC_Hook::add_action('class_alipay_notify_wap', function () {RC_Loader::load_plugin_class('alipay_notify_wap', 'pay_alipay', false);});
+RC_Hook::add_action('class_alipay_notify_mobile', function () {RC_Loader::load_plugin_class('alipay_notify_mobile', 'pay_alipay', false);});
+RC_Hook::add_action('class_alipay_request', function () {RC_Loader::load_plugin_class('alipay_request', 'pay_alipay', false);});
+RC_Hook::add_action('class_alipay_request_web', function () {RC_Loader::load_plugin_class('alipay_request_web', 'pay_alipay', false);});
+RC_Hook::add_action('class_alipay_request_wap', function () {RC_Loader::load_plugin_class('alipay_request_wap', 'pay_alipay', false);});
+RC_Hook::add_action('class_alipay_sign_interface', function () {RC_Loader::load_plugin_class('alipay_sign_interface', 'pay_alipay', false);});
+RC_Hook::add_action('class_alipay_sign_md5', function () {RC_Loader::load_plugin_class('alipay_sign_md5', 'pay_alipay', false);});
+RC_Hook::add_action('class_alipay_sign_rsa', function () {RC_Loader::load_plugin_class('alipay_sign_rsa', 'pay_alipay', false);});
 
 // end

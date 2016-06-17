@@ -3,7 +3,6 @@
  * 支付宝接口RSA函数
  * 详细：RSA签名、验签、解密
  */
-RC_Loader::load_plugin_class('alipay_sign_interface', 'pay_alipay', false);
 class alipay_sign_rsa implements alipay_sign_interface {
     
     /**

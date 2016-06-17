@@ -4,7 +4,6 @@
  * 功能：支付宝通知处理类
  * 详细：处理支付宝各接口通知返回
  */
-RC_Loader::load_plugin_class('alipay_core', 'pay_alipay', false);
 abstract class alipay_notify {
     /**
      * HTTPS形式消息验证地址
@@ -21,8 +20,8 @@ abstract class alipay_notify {
     
     public function __construct($alipay_config) {
         $this->alipay_config = array_merge($this->alipay_config, $alipay_config);
-        $this->sign_md5 = RC_Loader::load_plugin_class('alipay_sign_md5', 'pay_alipay');
-        $this->sign_rsa = RC_Loader::load_plugin_class('alipay_sign_rsa', 'pay_alipay');
+        $this->sign_md5 = new alipay_sign_md5();
+        $this->sign_rsa = new alipay_sign_rsa();
     }
 
     /**

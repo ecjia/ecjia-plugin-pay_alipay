@@ -136,3 +136,5 @@ class alipay_core {
         return $param_sort;
     }
 }
+
+// end

@@ -1,5 +1,5 @@
 <?php
-RC_Loader::load_plugin_class('alipay_notify', 'pay_alipay', false);
+
 class alipay_notify_mobile extends alipay_notify {
     /**
      * HTTPS形式消息验证地址
@@ -42,7 +42,7 @@ class alipay_notify_mobile extends alipay_notify {
             }
             $log_text = "response_text=" . $response_text . "\n notify_url_log:isSign=" . $isSignStr . ",";
             $log_text = $log_text . alipay_core::create_linkString($_POST);
-            RC_Log::write($log_text, RC_Log::INFO);
+            RC_Logger::getLogger('pay')->info($log_text);
             	
             //验证
             //$responsetTxt的结果不是true，与服务器设置问题、合作身份者ID、notify_id一分钟失效有关

@@ -20,9 +20,10 @@ class pay_alipay extends payment_abstract
     }
     
     
-    public function get_prepare_data() {    
+    public function get_prepare_data() {
         
         $charset = RC_CHARSET;
+        $alipay_config = $this->configure;
         
         if ($this->is_mobile) {
             $req_id = date('Ymdhis');
@@ -35,7 +36,7 @@ class pay_alipay extends payment_abstract
             $pay_parameter['seller_id']     = $this->configure['alipay_account'];
             $pay_parameter['notify_url']    = $this->return_url('/notify/pay_alipay.php');
             $pay_parameter['callback_url']  = $this->return_url('/notify/pay_alipay.php');
-            $pay_parameter['pay_order_sn']  = $this->order_info['order_sn'] . $this->order_info['log_id'];
+            $pay_parameter['pay_order_sn']  = $this->get_out_trade_no();
             $pay_parameter['pay_code']      = $this->configure['pay_code'];
             $pay_parameter['pay_name'] = $this->configure['pay_name'];
             
@@ -46,7 +47,7 @@ class pay_alipay extends payment_abstract
             $req_data .= '<seller_account_name>' . $pay_parameter['seller_id'] . '</seller_account_name>';
             $req_data .= '<notify_url>' . $pay_parameter['notify_url'] . '</notify_url>';
             $req_data .= '<out_user>' . $this->order_info['consignee'] . '</out_user>';
-            $req_data .= '<merchant_url>' . $this->return_url() . '</merchant_url>';
+            $req_data .= '<merchant_url>' . $this->return_url('/notify/pay_alipay.php') . '</merchant_url>';
             $req_data .= '<call_back_url>' . $pay_parameter['callback_url'] . '</call_back_url>';
             $req_data .= '</direct_trade_create_req>';
             
@@ -60,10 +61,8 @@ class pay_alipay extends payment_abstract
                 'v' 				=>'2.0',
                 '_input_charset' 	=> trim(strtolower($charset)),
             );
-
-            RC_Loader::load_plugin_class('alipay_request_wap', 'pay_alipay', false);
             
-            $alipay_config = $this->configure;
+            
             $alipay_config['sign_type'] = 'MD5';
             //建立请求
             $alipay_request = new alipay_request_wap($alipay_config);
@@ -73,7 +72,7 @@ class pay_alipay extends payment_abstract
             //解析远程模拟提交后返回的信息
             $para_html_text = $alipay_request->parse_response($html_text);
             //获取request_token
-            $request_token = $para_html_text['request_token'];
+            $request_token = isset($para_html_text['request_token']) ? $para_html_text['request_token'] : '';
 
             $req_data  = '<auth_and_execute_req>';
             $req_data  .= '<request_token>' . $request_token . '</request_token>';
@@ -90,7 +89,7 @@ class pay_alipay extends payment_abstract
                 '_input_charset'	=> trim(strtolower($charset)),
             );
 
-            $pay_parameter['pay_online'] = $alipay_request->build_request_param_toLink($parameter);; 
+            $pay_parameter['pay_online'] = $alipay_request->build_request_param_toLink($parameter);
             
             return $pay_parameter;
         } else {
@@ -120,44 +119,28 @@ class pay_alipay extends payment_abstract
             
                 /* 业务参数 */
                 'subject'           => $this->order_info['order_sn'],
-                'out_trade_no'      => $this->order_info['order_sn'] . $this->order_info['log_id'],
+                'out_trade_no'      => $this->get_out_trade_no(),
                 'price'             => $this->order_info['order_amount'],
                 'quantity'          => 1,
                 'payment_type'      => 1,
             
                 /* 物流参数 */
                 'logistics_type'    => 'EXPRESS',
-                'logistics_fee'     => 0,
+                'logistics_fee'     => '0',
                 'logistics_payment' => 'BUYER_PAY_AFTER_RECEIVE',
             
                 /* 买卖双方信息 */
                 'seller_email'      => $this->configure['alipay_account']
             );
-            
-            ksort($parameter);
-            reset($parameter);
-            
-            $param = '';
-            $sign  = '';
-            
-            foreach ($parameter AS $key => $val) {
-                $param .= "$key=" . urlencode($val) . "&";
-                $sign  .= "$key=$val&";
-            }
-            
-            $param = substr($param, 0, -1);
-            $md5_sign  = md5(substr($sign, 0, -1) . $this->configure['alipay_key']);
-            
-            $button_attr = $parameter;
-            
-            $url = 'https://mapi.alipay.com/gateway.do?' . $param . '&sign=' . $md5_sign . '&sign_type=MD5';
-        }
-        
-        $parameter['sign'] = urlencode($md5_sign);
-        
-        $button_attr['pay_online'] = $url;
 
-        return $button_attr;
+            $alipay_config['sign_type'] = 'MD5';
+            $alipay_request = new alipay_request_web($alipay_config);
+            $button_attr = $alipay_request->build_request_param($parameter);;
+
+            $button_attr['pay_online'] = $alipay_request->build_request_param_toLink($parameter);
+            
+            return $button_attr;
+        }
     }
     
     
@@ -169,17 +152,19 @@ class pay_alipay extends payment_abstract
             'transport'         => 'http',
         );
         
-        //计算得出通知验证结果
-        if (isset($_POST['notify_type'])) {
-            $alipay_config['sign_type'] = 'RSA';
-            $alipay_config['private_key'] = $this->configure['private_key'];
-            
-            RC_Loader::load_plugin_class('alipay_notify_mobile', 'pay_alipay', false);
-            $alipay_notify = new alipay_notify_mobile($alipay_config);
-        } else {
+        if ($_POST['service'] == 'alipay.wap.trade.create.direct') {
             $alipay_config['sign_type'] = 'MD5';
-            RC_Loader::load_plugin_class('alipay_notify_wap', 'pay_alipay', false);
             $alipay_notify = new alipay_notify_wap($alipay_config);
+        } else {
+            //计算得出通知验证结果 //web mobile 区分
+            if ($_POST['sign_type'] == 'RSA') {
+                $alipay_config['sign_type'] = 'RSA';
+                $alipay_config['private_key'] = $this->configure['private_key'];
+                $alipay_notify = new alipay_notify_mobile($alipay_config);
+            } else {
+                $alipay_config['sign_type'] = 'MD5';
+                $alipay_notify = new alipay_notify_web($alipay_config);
+            }
         }
 
         $verify_result = $alipay_notify->verify_notify();
@@ -189,8 +174,9 @@ class pay_alipay extends payment_abstract
                 $notify_data = $alipay_notify->get_notify_data($_POST['notify_data']);
                 if (!empty($notify_data)) {
                     //获取订单ID
-                    $order_sn = substr($notify_data['out_trade_no'], 0, 13);
-                    $log_id = substr($notify_data['out_trade_no'], 13);
+                    $item = $this->parse_out_trade_no($notify_data['out_trade_no']);
+                     $order_sn = $item['order_sn'];
+                     $log_id = $item['log_id'];
                 
                     $pay_status = PS_UNPAYED;
                     if ($notify_data['trade_status'] == 'TRADE_FINISHED' || $notify_data['trade_status'] == 'TRADE_SUCCESS') {
@@ -207,8 +193,9 @@ class pay_alipay extends payment_abstract
                 }
             } else {
                 //获取订单ID
-                $order_sn = substr($_POST['out_trade_no'], 0, 13);
-                $log_id = substr($_POST['out_trade_no'], 13);
+                $item = $this->parse_out_trade_no($_POST['out_trade_no']);
+                $order_sn = $item['order_sn'];
+                $log_id = $item['log_id'];
                 
                 $pay_status = PS_UNPAYED;
                 if ($_POST['trade_status'] == 'TRADE_FINISHED' || $_POST['trade_status'] == 'TRADE_SUCCESS') {
@@ -228,8 +215,6 @@ class pay_alipay extends payment_abstract
     }
     
     public function response() {
-        RC_Loader::load_plugin_class('alipay_notify_wap', 'pay_alipay', false);
-        
         $alipay_config = array(
             'alipay_partner'    => $this->configure['alipay_partner'],
             'alipay_key'        => $this->configure['alipay_key'],
@@ -238,10 +223,17 @@ class pay_alipay extends payment_abstract
             'transport'         => 'http',
         );
         //计算得出通知验证结果
-        $alipay_notify = new alipay_notify_wap($alipay_config);
+        if (!empty($_GET['result'])) {
+            $alipay_notify = new alipay_notify_wap($alipay_config);
+            $result_status = $_GET['result']; // success 是WAP支付时返回的GET参数
+        } else {
+            $alipay_notify = new alipay_notify_web($alipay_config);
+            $result_status = $_GET['trade_status']; // TRADE_FINISHED, TRADE_SUCCESS 是WEB支付时返回的GET参数
+        }
+        
         $verify_result = $alipay_notify->verify_return();
         if ($verify_result) {
-             if ($_GET['result'] == 'success') {
+            if ($result_status == 'TRADE_FINISHED' || $result_status == 'TRADE_SUCCESS' || $result_status == 'success') {
                 return true;
             } else {
                 return false;

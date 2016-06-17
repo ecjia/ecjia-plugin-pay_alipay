@@ -1,6 +1,5 @@
 <?php
 
-RC_Loader::load_plugin_class('alipay_request', 'pay_alipay', false);
 class alipay_request_wap extends alipay_request {
     protected $alipay_gateway_new = 'http://wappaygw.alipay.com/service/rest.htm?';
     

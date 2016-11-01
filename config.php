@@ -10,7 +10,8 @@ return array(
         array('name' => 'alipay_key',               'type' => 'text',       'value' => ''),
         array('name' => 'alipay_partner',           'type' => 'text',       'value' => ''),
         array('name' => 'alipay_pay_method',        'type' => 'select',     'value' => ''),
-        array('name' => 'private_key',		        'type' => 'textarea',   'value' => ''),
+        array('name' => 'private_key',		        	'type' => 'textarea',   'value' => ''),
+        array('name' => 'private_key_pkcs8',		    'type' => 'textarea',   'value' => ''),
     ),
 );
 

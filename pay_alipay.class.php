@@ -38,7 +38,8 @@ class pay_alipay extends payment_abstract
             $pay_parameter['callback_url']  = $this->return_url('/notify/pay_alipay.php');
             $pay_parameter['pay_order_sn']  = $this->get_out_trade_no();
             $pay_parameter['pay_code']      = $this->configure['pay_code'];
-            $pay_parameter['pay_name'] = $this->configure['pay_name'];
+            $pay_parameter['pay_name']      = $this->configure['pay_name'];
+            $pay_parameter['private_key']   = $this->configure['private_key_pkcs8'];
             
             $req_data  = '<direct_trade_create_req>';
             $req_data .= '<subject>' . $pay_parameter['subject'] . '</subject>';
@@ -105,6 +106,8 @@ class pay_alipay extends payment_abstract
             	case '2':
             	    $service = 'create_direct_pay_by_user';
             	    break;
+                default:
+                    $service = 'trade_create_by_buyer';
             }
             
             $extend_param = 'isv^sh22';

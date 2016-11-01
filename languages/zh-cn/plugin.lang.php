@@ -18,5 +18,6 @@ $LANG['alipay_pay_method_range'][1] = '使用担保交易接口';
 $LANG['alipay_pay_method_range'][2] = '使用即时到帐交易接口';
 
 $LANG['private_key'] = 'RSA（私钥）';
+$LANG['private_key_pkcs8'] = 'RSA（PKCS8私钥）';
 
 // end

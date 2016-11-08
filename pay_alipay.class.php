@@ -203,6 +203,9 @@ class pay_alipay extends payment_abstract
                 $order_sn = $item['order_sn'];
                 $log_id = $item['log_id'];
                 
+                $db = RC_DB::table('payment_record');
+                $db->where('order_sn', $order_sn)->where('trade_type', 'buy')->update(array('trade_no' => $_POST['trade_no']));
+                
                 $pay_status = PS_UNPAYED;
                 if ($_POST['trade_status'] == 'TRADE_FINISHED' || $_POST['trade_status'] == 'TRADE_SUCCESS') {
                     $pay_status = PS_PAYED;

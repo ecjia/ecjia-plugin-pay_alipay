@@ -85,7 +85,6 @@ class pay_alipay extends payment_abstract
             $pay_parameter['pay_code']      = $this->configure['pay_code'];
             $pay_parameter['pay_name']      = $this->configure['pay_name'];
             $pay_parameter['private_key']   = $this->configure['private_key_pkcs8'];
-            $pay_parameter['passback_params']   = 'ecjia';
             
             $req_data  = '<direct_trade_create_req>';
             $req_data .= '<subject>' . $pay_parameter['subject'] . '</subject>';
@@ -96,7 +95,6 @@ class pay_alipay extends payment_abstract
             $req_data .= '<out_user>' . $this->order_info['consignee'] . '</out_user>';
             $req_data .= '<merchant_url>' . $this->return_url('/notify/pay_alipay.php') . '</merchant_url>';
             $req_data .= '<call_back_url>' . $pay_parameter['callback_url'] . '</call_back_url>';
-            $req_data .= '<passback_params>' . $pay_parameter['passback_params'] . '</passback_params>';
             $req_data .= '</direct_trade_create_req>';
             
             $parameter = array (

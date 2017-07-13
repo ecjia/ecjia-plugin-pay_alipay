@@ -49,42 +49,64 @@
  */
 defined('IN_ECJIA') or exit('No permission resources.');
 
-RC_Loader::load_app_class('payment_abstract', 'payment', false);
+use Ecjia\App\Payment\PaymentAbstract;
 
-class pay_alipay extends payment_abstract
+class pay_alipay extends PaymentAbstract
 {
+        
     /**
-     * 获取插件配置信息
+     * 获取插件代号
+     *
+     * @see \Ecjia\System\Plugin\PluginInterface::getCode()
      */
-    public function configure_config() {
-        $config = include(RC_Plugin::plugin_dir_path(__FILE__) . 'config.php');
-        if (is_array($config)) {
-            return $config;
-        }
-        return array();
+    public function getCode()
+    {
+        return $this->loadConfig('pay_code');
+    }
+    
+    /**
+     * 加载配置文件
+     *
+     * @see \Ecjia\System\Plugin\PluginInterface::loadConfig()
+     */
+    public function loadConfig($key = null, $default = null)
+    {
+        return $this->loadPluginData(RC_Plugin::plugin_dir_path(__FILE__) . 'config.php', $key, $default);
+    }
+    
+    /**
+     * 加载语言包
+     *
+     * @see \Ecjia\System\Plugin\PluginInterface::loadLanguage()
+     */
+    public function loadLanguage($key = null, $default = null)
+    {
+        $locale = RC_Config::get('system.locale');
+    
+        return $this->loadPluginData(RC_Plugin::plugin_dir_path(__FILE__) . '/languages/'.$locale.'/plugin.lang.php', $key, $default);
     }
     
     
     public function get_prepare_data() {
         
         $charset = RC_CHARSET;
-        $alipay_config = $this->configure;
+        $alipay_config = $this->config;
         
         if ($this->is_mobile) {
             $req_id = date('Ymdhis');
             
             $pay_parameter['subject']       = ecjia::config('shop_name') . '的订单：' . $this->order_info['order_sn'];
-            $pay_parameter['partner']       = $this->configure['alipay_partner'];
+            $pay_parameter['partner']       = $this->config['alipay_partner'];
             $pay_parameter['order_sn']      = $this->order_info['order_sn'];
             $pay_parameter['order_logid']   = $this->order_info['log_id'];
             $pay_parameter['order_amount']  = $this->order_info['order_amount'];
-            $pay_parameter['seller_id']     = $this->configure['alipay_account'];
+            $pay_parameter['seller_id']     = $this->config['alipay_account'];
             $pay_parameter['notify_url']    = $this->return_url('/notify/pay_alipay.php');
             $pay_parameter['callback_url']  = $this->return_url('/notify/pay_alipay.php');
             $pay_parameter['pay_order_sn']  = $this->get_out_trade_no();
-            $pay_parameter['pay_code']      = $this->configure['pay_code'];
-            $pay_parameter['pay_name']      = $this->configure['pay_name'];
-            $pay_parameter['private_key']   = $this->configure['private_key_pkcs8'];
+            $pay_parameter['pay_code']      = $this->getCode();
+            $pay_parameter['pay_name']      = $this->getDisplayName();
+            $pay_parameter['private_key']   = $this->config['private_key_pkcs8'];
             
             $req_data  = '<direct_trade_create_req>';
             $req_data .= '<subject>' . $pay_parameter['subject'] . '</subject>';
@@ -101,7 +123,7 @@ class pay_alipay extends payment_abstract
                 'req_data' 			=> $req_data,
                 'service' 			=> 'alipay.wap.trade.create.direct',
                 'sec_id' 			=> 'MD5',
-                'partner' 			=> $this->configure['alipay_partner'],
+                'partner' 			=> $this->config['alipay_partner'],
                 'req_id' 			=> $req_id,
                 'format' 			=>'xml',
                 'v' 				=>'2.0',
@@ -126,7 +148,7 @@ class pay_alipay extends payment_abstract
             
             $parameter = array (
                 'service'           => 'alipay.wap.auth.authAndExecute',
-                'partner'           => $this->configure['alipay_partner'],
+                'partner'           => $this->config['alipay_partner'],
                 'sec_id'            => 'MD5',
                 'format'            => 'xml',
                 'v'                 => '2.0',
@@ -139,7 +161,7 @@ class pay_alipay extends payment_abstract
             
             return $pay_parameter;
         } else {
-            $real_method = $this->configure['alipay_pay_method'];
+            $real_method = $this->config['alipay_pay_method'];
             
             switch ($real_method){
             	case '0':
@@ -160,7 +182,7 @@ class pay_alipay extends payment_abstract
             $parameter = array(
                 'extend_param'      => $extend_param,
                 'service'           => $service,
-                'partner'           => $this->configure['alipay_partner'],
+                'partner'           => $this->config['alipay_partner'],
                 '_input_charset'    => $charset,
                 'notify_url'        => $this->return_url('/notify/pay_alipay.php'),
                 'return_url'        => $this->return_url('/notify/pay_alipay.php'),
@@ -178,7 +200,7 @@ class pay_alipay extends payment_abstract
                 'logistics_payment' => 'BUYER_PAY_AFTER_RECEIVE',
             
                 /* 买卖双方信息 */
-                'seller_email'      => $this->configure['alipay_account']
+                'seller_email'      => $this->config['alipay_account']
             );
 
             $alipay_config['sign_type'] = 'MD5';
@@ -194,8 +216,8 @@ class pay_alipay extends payment_abstract
     
     public function notify() {
         $alipay_config = array(
-            'alipay_partner'    => $this->configure['alipay_partner'],
-            'alipay_key'        => $this->configure['alipay_key'],
+            'alipay_partner'    => $this->config['alipay_partner'],
+            'alipay_key'        => $this->config['alipay_key'],
             'input_charset'     => 'utf-8',
             'transport'         => 'http',
         );
@@ -207,7 +229,7 @@ class pay_alipay extends payment_abstract
             //计算得出通知验证结果 //web mobile 区分
             if ($_POST['sign_type'] == 'RSA') {
                 $alipay_config['sign_type'] = 'RSA';
-                $alipay_config['private_key'] = $this->configure['private_key'];
+                $alipay_config['private_key'] = $this->config['private_key'];
                 $alipay_notify = new alipay_notify_mobile($alipay_config);
             } else {
                 $alipay_config['sign_type'] = 'MD5';
@@ -270,8 +292,8 @@ class pay_alipay extends payment_abstract
     
     public function response() {
         $alipay_config = array(
-            'alipay_partner'    => $this->configure['alipay_partner'],
-            'alipay_key'        => $this->configure['alipay_key'],
+            'alipay_partner'    => $this->config['alipay_partner'],
+            'alipay_key'        => $this->config['alipay_key'],
             'sign_type'         => 'MD5',
             'input_charset'     => 'utf-8',
             'transport'         => 'http',

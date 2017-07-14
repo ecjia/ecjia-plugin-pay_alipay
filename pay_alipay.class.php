@@ -248,12 +248,20 @@ class pay_alipay extends PaymentAbstract
                     $order_sn = $item['order_sn'];
                     $log_id = $item['log_id'];
                 
-                    $db = RC_DB::table('payment_record');
-                    $db->where('order_sn', $order_sn)->where('trade_type', 'buy')->update(array('trade_no' => $notify_data['trade_no']));
+                    
+                    
+//                     $db = RC_DB::table('payment_record');
+//                     $db->where('order_sn', $order_sn)->where('trade_type', 'buy')->update(array('trade_no' => $notify_data['trade_no']));
                     
                     $pay_status = PS_UNPAYED;
                     if ($notify_data['trade_status'] == 'TRADE_FINISHED' || $notify_data['trade_status'] == 'TRADE_SUCCESS') {
                         $pay_status = PS_PAYED;
+                        
+                        /* 更新支付流水记录*/
+                        RC_Api::api('payment', 'update_payment_record', [
+                            'order_sn' 		=> $order_sn,
+                            'trade_no'      => $notify_data['trade_no']
+                        ]);
                     }
                 
                     $result = RC_Api::api('orders', 'order_paid', array('log_id' => $log_id, 'money' => $notify_data['total_fee'], 'pay_status' => $pay_status));
@@ -270,12 +278,20 @@ class pay_alipay extends PaymentAbstract
                 $order_sn = $item['order_sn'];
                 $log_id = $item['log_id'];
                 
-                $db = RC_DB::table('payment_record');
-                $db->where('order_sn', $order_sn)->where('trade_type', 'buy')->update(array('trade_no' => $_POST['trade_no']));
+//                 $db = RC_DB::table('payment_record');
+//                 $db->where('order_sn', $order_sn)->where('trade_type', 'buy')->update(array('trade_no' => $_POST['trade_no']));
+                
+                
                 
                 $pay_status = PS_UNPAYED;
                 if ($_POST['trade_status'] == 'TRADE_FINISHED' || $_POST['trade_status'] == 'TRADE_SUCCESS') {
                     $pay_status = PS_PAYED;
+                    
+                    /* 更新支付流水记录*/
+                    RC_Api::api('payment', 'update_payment_record', [
+                        'order_sn' 		=> $order_sn,
+                        'trade_no'      => $notify_data['trade_no']
+                    ]);
                 }
                 
                 $result = RC_Api::api('orders', 'order_paid', array('log_id' => $log_id, 'money' => $_POST['total_fee'], 'pay_status' => $pay_status));

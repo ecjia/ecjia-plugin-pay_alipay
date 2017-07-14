@@ -290,7 +290,7 @@ class pay_alipay extends PaymentAbstract
                     /* 更新支付流水记录*/
                     RC_Api::api('payment', 'update_payment_record', [
                         'order_sn' 		=> $order_sn,
-                        'trade_no'      => $notify_data['trade_no']
+                        'trade_no'      => $_POST['trade_no']
                     ]);
                 }
                 

@@ -184,8 +184,8 @@ class pay_alipay extends PaymentAbstract
                 'service'           => $service,
                 'partner'           => $this->config['alipay_partner'],
                 '_input_charset'    => $charset,
-                'notify_url'        => $this->return_url('/notify/pay_alipay.php'),
-                'return_url'        => $this->return_url('/notify/pay_alipay.php'),
+                'notify_url'        => $this->notifyUrl(),
+                'return_url'        => $this->callbackUrl(),
             
                 /* 业务参数 */
                 'subject'           => $this->order_info['order_sn'],
@@ -213,6 +213,23 @@ class pay_alipay extends PaymentAbstract
         }
     }
     
+    /**
+     * 支付服务器异步回调通知地址
+     * @see \Ecjia\App\Payment\PaymentAbstract::notifyUrl()
+     */
+    public function notifyUrl()
+    {
+        return $this->return_url('/notify/pay_alipay.php');
+    }
+    
+    /**
+     * 支付服务器同步回调响应地址
+     * @see \Ecjia\App\Payment\PaymentAbstract::callbackUrl()
+     */
+    public function callbackUrl()
+    {
+        return $this->return_url('/notify/pay_alipay.php');
+    }
     
     public function notify() {
         $alipay_config = array(

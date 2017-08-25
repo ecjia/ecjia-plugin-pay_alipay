@@ -87,9 +87,21 @@ class pay_alipay extends PaymentAbstract
     }
     
     
+    public function handleApp() {
+        
+    }
+    
+    public function handleMobile() {
+        
+    }
+    
+    public function handlePc() {
+        
+    }
+    
     public function get_prepare_data() {
         
-        $charset = RC_CHARSET;
+        $charset = 'utf-8';
         $alipay_config = $this->config;
         
         if ($this->is_mobile) {
@@ -261,65 +273,93 @@ class pay_alipay extends PaymentAbstract
                 $notify_data = $alipay_notify->get_notify_data($_POST['notify_data']);
                 if (!empty($notify_data)) {
                     //获取订单ID
-                    $item = $this->parse_out_trade_no($notify_data['out_trade_no']);
-                    $order_sn = $item['order_sn'];
-                    $log_id = $item['log_id'];
+//                     $item = $this->parse_out_trade_no($notify_data['out_trade_no']);
+//                     $order_sn = $item['order_sn'];
+//                     $log_id = $item['log_id'];
                 
                     
                     
 //                     $db = RC_DB::table('payment_record');
 //                     $db->where('order_sn', $order_sn)->where('trade_type', 'buy')->update(array('trade_no' => $notify_data['trade_no']));
                     
-                    $pay_status = PS_UNPAYED;
+//                     $pay_status = PS_UNPAYED;
                     if ($notify_data['trade_status'] == 'TRADE_FINISHED' || $notify_data['trade_status'] == 'TRADE_SUCCESS') {
-                        $pay_status = PS_PAYED;
+//                         $pay_status = PS_PAYED;
+                        $money = $notify_data['total_fee']/100;
                         
                         /* 更新支付流水记录*/
-                        RC_Api::api('payment', 'update_payment_record', [
-                            'order_sn' 		=> $order_sn,
-                            'trade_no'      => $notify_data['trade_no']
-                        ]);
+                        $result = $this->updateOrderPaid($notify_data['out_trade_no'], $money, $notify_data['trade_no']);
+                        if (is_ecjia_error($result)) {
+                            $result->add_data('FAIL');
+                            return $result;
+                        }
+                        
+                        return 'SUCCESS';
+//                         /* 更新支付流水记录*/
+//                         RC_Api::api('payment', 'update_payment_record', [
+//                             'order_sn' 		=> $order_sn,
+//                             'trade_no'      => $notify_data['trade_no']
+//                         ]);
                     }
-                
-                    $result = RC_Api::api('orders', 'order_paid', array('log_id' => $log_id, 'money' => $notify_data['total_fee'], 'pay_status' => $pay_status));
-                    if (is_ecjia_error($result)) {
-                        return $result;
-                    } else {
-                        return $result;
+                    else {
+                        return new ecjia_error('pay_fail', '支付宝支付失败', 'FAIL');
                     }
+//                     $result = RC_Api::api('orders', 'order_paid', array('log_id' => $log_id, 'money' => $notify_data['total_fee'], 'pay_status' => $pay_status));
+//                     if (is_ecjia_error($result)) {
+//                         return $result;
+//                     } else {
+//                         return $result;
+//                     }
                 
+                } else {
+                    return new ecjia_error('notify_data_fail', '通知数据获取失败', 'FAIL');
                 }
+                
+                
             } else {
                 //获取订单ID
-                $item = $this->parse_out_trade_no($_POST['out_trade_no']);
-                $order_sn = $item['order_sn'];
-                $log_id = $item['log_id'];
+//                 $item = $this->parse_out_trade_no($_POST['out_trade_no']);
+//                 $order_sn = $item['order_sn'];
+//                 $log_id = $item['log_id'];
                 
 //                 $db = RC_DB::table('payment_record');
 //                 $db->where('order_sn', $order_sn)->where('trade_type', 'buy')->update(array('trade_no' => $_POST['trade_no']));
                 
                 
                 
-                $pay_status = PS_UNPAYED;
+//                 $pay_status = PS_UNPAYED;
                 if ($_POST['trade_status'] == 'TRADE_FINISHED' || $_POST['trade_status'] == 'TRADE_SUCCESS') {
-                    $pay_status = PS_PAYED;
+//                     $pay_status = PS_PAYED;
+                    
+//                     /* 更新支付流水记录*/
+//                     RC_Api::api('payment', 'update_payment_record', [
+//                         'order_sn' 		=> $order_sn,
+//                         'trade_no'      => $_POST['trade_no']
+//                     ]);
+                    
+                    $money = $notify_data['total_fee']/100;
                     
                     /* 更新支付流水记录*/
-                    RC_Api::api('payment', 'update_payment_record', [
-                        'order_sn' 		=> $order_sn,
-                        'trade_no'      => $_POST['trade_no']
-                    ]);
+                    $result = $this->updateOrderPaid($_POST['out_trade_no'], $money, $_POST['trade_no']);
+                    if (is_ecjia_error($result)) {
+                        $result->add_data('FAIL');
+                        return $result;
+                    }
+                    
+                    return 'SUCCESS';
                 }
-                
-                $result = RC_Api::api('orders', 'order_paid', array('log_id' => $log_id, 'money' => $_POST['total_fee'], 'pay_status' => $pay_status));
-                if (is_ecjia_error($result)) {
-                    return $result;
-                } else {
-                    return $result;
+                else {
+                    return new ecjia_error('pay_fail', '支付宝支付失败', 'FAIL');
                 }
+//                 $result = RC_Api::api('orders', 'order_paid', array('log_id' => $log_id, 'money' => $_POST['total_fee'], 'pay_status' => $pay_status));
+//                 if (is_ecjia_error($result)) {
+//                     return $result;
+//                 } else {
+//                     return $result;
+//                 }
             } 
         } else {
-            return new ecjia_error('sign_verify_data_fail', '签名验证失败');
+            return new ecjia_error('sign_verify_data_fail', '签名验证失败', 'FAIL');
         }
     }
     

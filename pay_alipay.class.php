@@ -246,9 +246,7 @@ class pay_alipay extends PaymentAbstract
      */
     public function callbackUrl()
     {
-        $callback_url = $this->return_url('/notify/pay_alipay.php');
-        $callback_url = RC_Hook::apply_filters('payment_callback_url_filter', $callback_url, $this->order_info);
-        return $callback_url;
+        return $this->return_url('/notify/pay_alipay.php');;
     }
     
     public function notify() {

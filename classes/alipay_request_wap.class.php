@@ -46,7 +46,7 @@
 //
 
 class alipay_request_wap extends alipay_request {
-    protected $alipay_gateway_new = 'http://wappaygw.alipay.com/service/rest.htm?';
+    protected $alipay_gateway_new = 'https://wappaygw.alipay.com/service/rest.htm?';
     
     public function __construct($alipay_config) {
         parent::__construct($alipay_config);

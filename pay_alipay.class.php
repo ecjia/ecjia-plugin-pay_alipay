@@ -107,6 +107,8 @@ class pay_alipay extends PaymentAbstract
         $recordId = $this->getPaymentRecordId();
         $out_trade_no = $this->getOrderTradeNo($recordId);
         
+        /* 添加商户信息 */
+        $this->getPaymentRecord()->updatePartner($out_trade_no, $this->config['alipay_partner'], $this->config['alipay_account']);
         
         if ($this->is_mobile) {
             $req_id = date('Ymdhis');

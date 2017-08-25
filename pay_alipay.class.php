@@ -291,7 +291,7 @@ class pay_alipay extends PaymentAbstract
 //                     $pay_status = PS_UNPAYED;
                     if ($notify_data['trade_status'] == 'TRADE_FINISHED' || $notify_data['trade_status'] == 'TRADE_SUCCESS') {
 //                         $pay_status = PS_PAYED;
-                        $money = $notify_data['total_fee']/100;
+                        $money = $notify_data['total_fee'];
                         
                         /* 更新支付流水记录*/
                         $result = $this->updateOrderPaid($notify_data['out_trade_no'], $money, $notify_data['trade_no']);
@@ -343,7 +343,7 @@ class pay_alipay extends PaymentAbstract
 //                         'trade_no'      => $_POST['trade_no']
 //                     ]);
                     
-                    $money = $notify_data['total_fee']/100;
+                    $money = $notify_data['total_fee'];
                     
                     /* 更新支付流水记录*/
                     $result = $this->updateOrderPaid($_POST['out_trade_no'], $money, $_POST['trade_no']);

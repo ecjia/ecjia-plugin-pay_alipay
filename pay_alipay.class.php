@@ -104,6 +104,10 @@ class pay_alipay extends PaymentAbstract
         $charset = 'utf-8';
         $alipay_config = $this->config;
         
+        $recordId = $this->getPaymentRecordId();
+        $out_trade_no = $this->getOrderTradeNo($recordId);
+        
+        
         if ($this->is_mobile) {
             $req_id = date('Ymdhis');
             
@@ -115,7 +119,7 @@ class pay_alipay extends PaymentAbstract
             $pay_parameter['seller_id']     = $this->config['alipay_account'];
             $pay_parameter['notify_url']    = $this->return_url('/notify/pay_alipay.php');
             $pay_parameter['callback_url']  = $this->return_url('/notify/pay_alipay.php');
-            $pay_parameter['pay_order_sn']  = $this->get_out_trade_no();
+            $pay_parameter['pay_order_sn']  = $out_trade_no;
             $pay_parameter['pay_code']      = $this->getCode();
             $pay_parameter['pay_name']      = $this->getDisplayName();
             $pay_parameter['private_key']   = $this->config['private_key_pkcs8'];
@@ -201,7 +205,7 @@ class pay_alipay extends PaymentAbstract
             
                 /* 业务参数 */
                 'subject'           => $this->order_info['order_sn'],
-                'out_trade_no'      => $this->get_out_trade_no(),
+                'out_trade_no'      => $out_trade_no,
                 'price'             => $this->order_info['order_amount'],
                 'quantity'          => 1,
                 'payment_type'      => 1,

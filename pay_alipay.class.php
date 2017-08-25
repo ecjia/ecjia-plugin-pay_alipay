@@ -119,8 +119,8 @@ class pay_alipay extends PaymentAbstract
             $pay_parameter['order_logid']   = $this->order_info['log_id'];
             $pay_parameter['order_amount']  = $this->order_info['order_amount'];
             $pay_parameter['seller_id']     = $this->config['alipay_account'];
-            $pay_parameter['notify_url']    = $this->return_url('/notify/pay_alipay.php');
-            $pay_parameter['callback_url']  = $this->return_url('/notify/pay_alipay.php');
+            $pay_parameter['notify_url']    = $this->notifyUrl();
+            $pay_parameter['callback_url']  = $this->callbackUrl();
             $pay_parameter['pay_order_sn']  = $out_trade_no;
             $pay_parameter['pay_code']      = $this->getCode();
             $pay_parameter['pay_name']      = $this->getDisplayName();

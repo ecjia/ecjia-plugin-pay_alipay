@@ -389,6 +389,7 @@ class pay_alipay extends PaymentAbstract
         $verify_result = $alipay_notify->verify_return();
         if ($verify_result) {
             if ($result_status == 'TRADE_FINISHED' || $result_status == 'TRADE_SUCCESS' || $result_status == 'success') {
+                $this->parseOrderTradeNo($_GET['out_trade_no']);
                 return true;
             } else {
                 return false;

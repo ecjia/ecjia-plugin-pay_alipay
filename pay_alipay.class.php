@@ -343,7 +343,7 @@ class pay_alipay extends PaymentAbstract
 //                         'trade_no'      => $_POST['trade_no']
 //                     ]);
                     
-                    $money = $notify_data['total_fee'];
+                    $money = $_POST['total_fee'];
                     
                     /* 更新支付流水记录*/
                     $result = $this->updateOrderPaid($_POST['out_trade_no'], $money, $_POST['trade_no']);

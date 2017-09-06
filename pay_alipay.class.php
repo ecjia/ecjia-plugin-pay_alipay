@@ -345,10 +345,10 @@ class pay_alipay extends PaymentAbstract
                 $this->parseOrderTradeNo($_GET['out_trade_no']);
                 return true;
             } else {
-                return new ecjia_error('pay_fail', '支付宝交易失败', 'FAIL');
+                return new ecjia_error('pay_fail', '支付宝交易失败', '支付交易失败');
             }
         } else {
-            return new ecjia_error('sign_verify_data_fail', '签名验证失败', 'FAIL');
+            return new ecjia_error('sign_verify_data_fail', '签名验证失败', '签名验证失败');
         }
     }
 

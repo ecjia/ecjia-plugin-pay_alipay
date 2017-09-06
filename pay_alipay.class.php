@@ -331,12 +331,14 @@ class pay_alipay extends PaymentAbstract
             'transport'         => 'http',
         );
         //计算得出通知验证结果
-        if (!empty($_GET['result'])) {
+        if (array_get($_GET, 'result')) {
             $alipay_notify = new alipay_notify_wap($alipay_config);
             $result_status = $_GET['result']; // success 是WAP支付时返回的GET参数
-        } else {
+        } elseif (array_get($_GET, 'trade_status')) {
             $alipay_notify = new alipay_notify_web($alipay_config);
             $result_status = $_GET['trade_status']; // TRADE_FINISHED, TRADE_SUCCESS 是WEB支付时返回的GET参数
+        } else {
+            return new ecjia_error('pay_cancel', '支付宝交易取消', '支付取消');
         }
         
         $verify_result = $alipay_notify->verify_return();

@@ -280,7 +280,7 @@ class pay_alipay extends PaymentAbstract
                 if (!empty($notify_data)) {
                     if ($notify_data['trade_status'] == 'TRADE_FINISHED' || $notify_data['trade_status'] == 'TRADE_SUCCESS') {
                         $money = $notify_data['total_fee'];
-                        
+                        RC_Logger::getLogger('pay')->info('支付宝H5交易成功后更新订单');
                         /* 更新支付流水记录*/
                         $result = $this->updateOrderPaid($notify_data['out_trade_no'], $money, $notify_data['trade_no']);
                         if (is_ecjia_error($result)) {

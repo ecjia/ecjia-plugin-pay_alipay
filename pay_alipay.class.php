@@ -250,6 +250,8 @@ class pay_alipay extends PaymentAbstract
     }
     
     public function notify() {
+        remove_route_var();
+
         $alipay_config = array(
             'alipay_partner'    => $this->config['alipay_partner'],
             'alipay_key'        => $this->config['alipay_key'],
@@ -323,6 +325,8 @@ class pay_alipay extends PaymentAbstract
     }
     
     public function response() {
+        remove_route_var();
+
         $alipay_config = array(
             'alipay_partner'    => $this->config['alipay_partner'],
             'alipay_key'        => $this->config['alipay_key'],

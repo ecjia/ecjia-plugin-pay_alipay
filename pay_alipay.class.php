@@ -98,6 +98,14 @@ class pay_alipay extends PaymentAbstract
     public function handlePc() {
         
     }
+
+    /**
+     * 统一下单方法
+     */
+    public function unifiedOrder()
+    {
+
+    }
     
     public function get_prepare_data() {
         

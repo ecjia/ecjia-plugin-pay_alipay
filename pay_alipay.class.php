@@ -50,8 +50,9 @@
 defined('IN_ECJIA') or exit('No permission resources.');
 
 use Ecjia\App\Payment\PaymentAbstract;
+use Ecjia\App\Payment\Contracts\CallbackPayment;
 
-class pay_alipay extends PaymentAbstract
+class pay_alipay extends PaymentAbstract implements CallbackPayment
 {
         
     /**

@@ -110,7 +110,7 @@ class pay_alipay extends PaymentAbstract implements CallbackPayment
         if ($this->is_mobile) {
             $req_id = date('Ymdhis');
             
-            $pay_parameter['subject']       = ecjia::config('shop_name') . '的订单：' . $this->order_info['order_sn'];
+            $pay_parameter['subject']       = sprintf(__('%s的订单：%s', 'pay_alipay'), ecjia::config('shop_name'), $this->order_info['order_sn']);
             $pay_parameter['partner']       = $this->config['alipay_partner'];
             $pay_parameter['order_sn']      = $this->order_info['order_sn'];
             $pay_parameter['order_logid']   = $this->order_info['log_id'];
